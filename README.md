@@ -1,12 +1,11 @@
-WebApiStore es una apiRest desarrollado en dotNet Core 6
+#WebApiStore es una apiRest desarrollado en dotNet Core 6
 
-=========
 
-Una tienda online necesita realizar el movimiento de stock de sus inventarios, WebApiStore en su primera version básicamente es una api que nos permite crear productos y servicios.
+Una tienda online necesita realizar el movimiento de stock de sus inventarios, WebApiStore en su primera versión básicamente es una api que nos permite crear productos y servicios.
 Los productos pueden guardar registro de sus movimientos y actualizar stock de dichos productos.
 Los end points habilitados son los siguientes:
 
-# Products #
+# Productos #
 
 |Ruta||Función|
 |----------|----------|----------|
