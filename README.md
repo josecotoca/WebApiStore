@@ -1,4 +1,5 @@
 #WebApiStore es una apiRest desarrollado en dotNet Core 6
+Ejemplo de solución aplicando arquitecturas limpias
 
 
 Una tienda online necesita realizar el movimiento de stock de sus inventarios, WebApiStore en su primera versión básicamente es una api que nos permite crear productos y servicios.
@@ -9,16 +10,8 @@ Los end points habilitados son los siguientes:
 
 |Ruta||Función|
 |----------|----------|----------|
-|/api/v1/products|GET| Listado de productos|
-|/api/v1/products|POST| Registra nuevo producto o servicio|
-|/api/v1/products/{id}|PUT|Actualiza producto existente|
-|/api/v1/products/{id}|GET|Recupera un producto seleccionado por Id|
-|/api/v1/products/{id}|DELETE|Elimina un producto de la lista de productos|
-
-# Transacciones #
-|Ruta||Función|
-|----------|----------|----------|
-|/api/v1/transactions|GET| Listado de transacciones de inventario|
-|/api/v1/transactions|POST| Registra nueva transaccion de inventario (INGRESO, EGRESO)|
-|/api/v1/transactions/{id}|GET|Recupera una transaccion seleccionado por Id|
-|/api/v1/transactions/{id}|DELETE|Elimina una transaccion seleccionada|
+|/api/v2/products/GetByName/{productName?}|GET| Listado de productos con filtro de busqueda por nombre|
+|/api/v2/products/GetById/{productId}|GET|Recupera un producto seleccionado por Id|
+|/api/v2/products|POST| Registra nuevo producto o servicio|
+|/api/v2/products|PUT|Actualiza producto existente|
+|/api/v2/products/{productId}|DELETE|Elimina un producto de la lista de productos|
