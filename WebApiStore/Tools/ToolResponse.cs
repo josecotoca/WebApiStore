@@ -1,5 +1,5 @@
-﻿using FluentValidation.Results;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApiStore.Tools
 {

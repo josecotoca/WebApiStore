@@ -1,19 +1,11 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
+using WebApiStore.Dtos.Base;
 
-namespace WebApiStore.Dtos
+namespace WebApiStore.Dtos.Product
 {
-    public class ProductDto
+    public class ProductCreateDto
     {
-        [Required]
-        [DefaultValue(0)]
-        public int Id { get; set; }
-        [DefaultValue("")]
-        public string Code { get; set; }
-
-        [Required]
-        [MaxLength(100)]
-        [DefaultValue("POLERA HERING BLANCA")]
         public string Name { get; set; }
 
         [Required]
@@ -36,6 +28,5 @@ namespace WebApiStore.Dtos
         [Required]
         [DefaultValue(false)]
         public bool IsService { get; set; }
-        
     }
 }

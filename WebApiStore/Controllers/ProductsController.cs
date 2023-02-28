@@ -1,134 +1,136 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using WebApiStore.Entities;
-using WebApiStore.Interfaces;
-using WebApiStore.Dtos;
-using WebApiStore.Repositories;
+﻿using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
+using WebApiStore.Application.Interfaces;
+using WebApiStore.Core.Entities;
+using WebApiStore.Dtos.Product;
+using WebApiStore.Infraestructure.Repository;
 using WebApiStore.Tools;
-using WebApiStore.Validators;
-using FluentValidation;
-using System.ComponentModel.DataAnnotations;
+using WebApiStore.Core.Repositories;
 
 namespace WebApiStore.Controllers
 {
-    
     [ApiController]
-    [Route("api/v1/products")]
+    [Route("api/v2/products")]
     [Produces("application/json")]
     public class ProductsController : ControllerBase
     {
-        private readonly IProduct productRepository;
         private readonly IMapper mapper;
-        private readonly IValidator<ProductDto> validator;
-        public ProductsController(IProduct _productRepository, IMapper _mapper, IValidator<ProductDto> _validator)
+        private readonly IProductService productService;
+        public ProductsController(IMapper mapper, IProductService productService)
         {
-            productRepository = _productRepository;
-            mapper = _mapper;
-            validator = _validator;
+            this.mapper = mapper;
+            this.productService = productService;
         }
 
-        [HttpGet]
-        public  ActionResult<ProductDto> GetProducts()
+        [HttpGet("GetById/{productId}")]
+        public async Task<ActionResult> GetProductById(int productId)
         {
             try
             {
-                var products = productRepository.GetAll();
-
-                if(products == null)
-                {
-                    return ToolResponse.responseNotFound("");
-                }
-
-                var response = mapper.Map<List<ProductDto>>(products);
+                var product = await productService.GetProductById(productId);
+                var response = mapper.Map<ProductDto>(product);
 
                 return ToolResponse.responseOk(response);
 
             }
+            catch (ApplicationException ex)
+            {
+                return ToolResponse.responseServerError(ex.Message.ToString());
+            }
+            catch {
+                return ToolResponse.responseServerError();
+            }
+        }
+
+
+        [Route("GetByName/{productName?}")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsByName([FromRoute] string? productName)
+        {
+            try
+            {
+                IEnumerable<ProductDto> response = Enumerable.Empty<ProductDto>();
+                IEnumerable<Product> list = Enumerable.Empty<Product>();
+
+                if (string.IsNullOrWhiteSpace(productName))
+                    list = await productService.GetProductList();
+                else
+                    list = await productService.GetProductByName(productName);
+
+                response = mapper.Map<IEnumerable<ProductDto>>(list);
+                return ToolResponse.responseOk(response);
+            }
             catch (Exception ex)
             {
-                return ToolResponse.responseServerError();
+                return ToolResponse.responseServerError(ex.Message.ToString());
             }
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateProduct([FromBody]ProductDto product)
+        public async Task<ActionResult> CreateProduct(ProductCreateDto productViewModel)
         {
             try
             {
-                if (await productRepository.ExistsByName(product.Name) == true) return ToolResponse.responseNotFound("No existe el producto.");
-                var data = mapper.Map<Product>(product);
-                await productRepository.Add(data);
-                var response = mapper.Map<ProductDto>(data);
+                var mapped = mapper.Map<Product>(productViewModel);
+                if (mapped == null) throw new Exception("La entidad no pudo cargar");
+
+                var entityDto = await productService.Create(mapped);
+                var response = mapper.Map<ProductDto>(entityDto);
 
                 return ToolResponse.responseCreated(response);
-            } catch (Exception) {
+            }
+            catch (ApplicationException ex)
+            {
+                return ToolResponse.responseServerError(ex.Message.ToString());
+            }
+            catch
+            {
                 return ToolResponse.responseServerError();
             }
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateProduct([FromBody] ProductDto product, int id)
+        [HttpPut]
+        public async Task<ActionResult> UpdateProduct(ProductDto productViewModel)
         {
             try
             {
-                if (await productRepository.ExistsById(id) == false) return ToolResponse.responseNotFound("No existe el producto.");
+                var mapped = mapper.Map<Product>(productViewModel);
+                if (mapped == null) throw new ApplicationException("La entidad no se ha podido cargar.");
 
-                var productToUpdate = await productRepository.GetById(id);
-                productToUpdate.forSale = product.ForSale;
-                productToUpdate.isService = product.IsService;
-                productToUpdate.Price = product.Price;
-                productToUpdate.Name = product.Name;
-                productToUpdate.Description = product.Description;
-                productToUpdate.Category= product.Category;
+                await productService.Update(mapped);
 
-                await this.productRepository.Update(productToUpdate);
-                var response = mapper.Map<ProductDto>(productToUpdate);
+                var response = mapper.Map<ProductDto>(mapped);
 
                 return ToolResponse.responseAccepted(response);
             }
-            catch (Exception)
+            catch (ApplicationException ex)
+            {
+                return ToolResponse.responseServerError(ex.Message.ToString());
+            }
+            catch
             {
                 return ToolResponse.responseServerError();
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult> GetProduct(int id)
+        [HttpDelete("{productId}")]
+        public async Task<IActionResult> DeleteProduct(int productId)
         {
+            
             try
             {
-                if (await productRepository.ExistsById(id) == false) return ToolResponse.responseNotFound("No existe el producto.");
-                
-                var product = await productRepository.GetById(id);
-                var response = mapper.Map<ProductStockDto>(product);
-                return ToolResponse.responseOk(response);
-            }
-            catch (Exception)
-            {
-                return ToolResponse.responseServerError();
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int id)
-        {
-            try
-            {
-                if (await productRepository.ExistsById(id) == false) return ToolResponse.responseNotFound("No existe el producto.");
-
-                var productToDelete = await productRepository.GetById(id);
-
-                await productRepository.Delete(productToDelete);
+                await productService.Delete(productId);
 
                 return ToolResponse.responseNoContent();
-
             }
-            catch (Exception)
+            catch (ApplicationException ex)
+            {
+                return ToolResponse.responseServerError(ex.Message.ToString());
+            }
+            catch
             {
                 return ToolResponse.responseServerError();
             }
         }
-
-
     }
 }

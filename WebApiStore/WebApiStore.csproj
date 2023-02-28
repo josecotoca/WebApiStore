@@ -8,10 +8,15 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
-    <PackageReference Include="EntityFrameworkCore.Triggered" Version="3.2.2" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WebApiStore.Application\WebApiStore.Application.csproj" />
+    <ProjectReference Include="..\WebApiStore.Core\WebApiStore.Core.csproj" />
+    <ProjectReference Include="..\WebApiStore.Infraestructure\WebApiStore.Infraestructure.csproj" />
   </ItemGroup>
 
 </Project>

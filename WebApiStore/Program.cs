@@ -1,47 +1,35 @@
-using FluentValidation.AspNetCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using System.Reflection;
-using WebApiStore.Context;
-using WebApiStore.Entities;
-using WebApiStore.Interfaces;
-using WebApiStore.Dtos;
-using WebApiStore.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+using WebApiStore.Core.Repositories;
+using WebApiStore.Core.Repositories.Base;
+using WebApiStore.Infraestructure.Repository;
+using WebApiStore.Infraestructure.Data;
+using WebApiStore.Infraestructure.Repository.Base;
+using WebApiStore.Application.Interfaces;
+using WebApiStore.Application.Services;
+using FluentValidation.AspNetCore;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<DataBaseContext>();
 
-builder.Services.AddTransient<IProduct, ProductRepository>();
-builder.Services.AddTransient<ITransaction, TransactionRepository>();
-builder.Services.AddTransient<ITransactionDetail, TransactionDetailRepository>();
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-builder.Services.AddAutoMapper(config =>
-{
-    config.CreateMap<Product, ProductDto>().ReverseMap();
-    config.CreateMap<Transaction, TransactionDto>().ReverseMap();
-    config.CreateMap<TransactionDetail, TransactionDetailDto>().ReverseMap();
-    config.CreateMap<Product, ProductStockDto>();
-});
+builder.Services.AddDbContext<WebApiStoreContext>(c =>
+    c.UseInMemoryDatabase("dbConnection"));
 
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+builder.Services.AddScoped<IProductService, ProductService>();
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddControllers()
     .AddFluentValidation(c => c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Version = "v1",
-        Title = "WebApiStore",
-        Description = "Rest api in dotnet core for store",
-    });
-});
-
 
 var app = builder.Build();
 
